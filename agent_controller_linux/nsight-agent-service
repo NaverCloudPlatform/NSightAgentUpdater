@@ -1,0 +1,50 @@
+#!/bin/sh
+#chkconfig: 2345 50 90
+#description:Activates/Deactivates Nsight2.0 Agent
+
+PY=PYTHON
+PROG=AGENT
+
+start_agent () {
+    echo "Starting $PROG"
+    eval "$PY $PROG $ARGS" 1>/dev/null 2>&1 &
+}
+
+stop_agent () {
+    echo "Stopping $PROG"
+    pkill $1 -f "$PY $PROG"
+}
+
+forcestop () {
+    #try=0
+    #while status; do
+    #    try=$((try + 1))
+    #    if [ $try -gt 3 ]; then
+    #        stop_agent -9
+    #    else
+    #        stop_agent
+    #    fi
+    #    echo "Waiting for $PROG to die.."
+    #    sleep 1
+    #done
+    stop_agent -9
+}
+
+restart () {
+    stop_agent
+    start_agent
+}
+
+case $1 in
+    start)
+        start_agent
+        ;;
+    stop)
+        forcestop
+        ;;
+    restart)
+        restart
+        ;;
+    *)
+        ;;
+esac

@@ -1,0 +1,11 @@
+[Unit]
+Description=NSight2.0 Agent
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=PYTHON AGENT
+
+[Install]
+WantedBy=multi-user.target
+
