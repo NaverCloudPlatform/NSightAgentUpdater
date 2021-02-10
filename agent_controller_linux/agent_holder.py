@@ -11,8 +11,8 @@ LOG = logger.get_logger('agent_tracker')
 
 class AgentHolder(ProcessHolder):
 
-    def __init__(self, agent_dir):
-        super(AgentHolder, self).__init__()
+    def __init__(self, agent_dir, recycle_queue):
+        super(AgentHolder, self).__init__(recycle_queue)
         self.agent_dir = agent_dir
         self.agent_process = None
         self.log_thread = None
@@ -20,7 +20,7 @@ class AgentHolder(ProcessHolder):
         self.last_check_time = int(time.time())
 
     def start(self):
-        LOG.debug('______ start agent: %s', self.agent_dir)
+        LOG.info('______ start agent: %s', self.agent_dir)
         py = '%s/.venv/bin/python' % self.agent_dir
         entry = '%s/agent.py' % self.agent_dir
         self.process_name = '%s %s' % (py, entry)
@@ -41,16 +41,15 @@ class AgentHolder(ProcessHolder):
         return self.process_name
 
     def stop(self):
-        # LOG.debug('...... stop-agent, gpid:%d, pid:%d' % (os.getpgid(self.agent_process.pid), self.agent_process.pid))
-        LOG.debug('______ stop agent')
+        LOG.info('______ stop agent')
         if self.log_thread:
             self.log_thread.stop()
 
-        os.popen('killall -g %s' % self.process_name)
-        # os.killpg(os.getpgid(self.agent_process.pid), 9)
-        if self.agent_process:
-            self.agent_process.wait()
-        # os.kill(0 - os.getpgid(self.agent_process.pid), 9)
+        self.kill_process(self.agent_process, process_name=self.process_name)
+        self.agent_process = None
+        # os.popen('killall -g %s' % self.process_name)
+        # if self.agent_process:
+        #     self.agent_process.wait()
 
 
 class DumpLogThread(threading.Thread):

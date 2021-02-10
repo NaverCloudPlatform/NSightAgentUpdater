@@ -4,16 +4,16 @@ AGENT_ROOT=$(cd `dirname $0`; pwd)
 PYTHON_HOME=$AGENT_ROOT/agent_python
 VENV_BIN=$AGENT_ROOT/.venv/bin
 PYTHON_PATH=$VENV_BIN/python
-AGENT_PATH=$AGENT_ROOT/controller.py
+AGENT_PATH=$AGENT_ROOT/agent_updater.py
 SERVICE_SOURCE_FILE="nsight-agent-service"
 SERVICE_FILE="nsight-agent"
 
 install_agent() {
   if [ ! -e $PYTHON_HOME/bin/python ]; then
-    if [ ! -d $AGENT_ROOT/install/Python-2.7.5 ]; then
-      tar xzf $AGENT_ROOT/install/Python-2.7.5.tar.gz -C $AGENT_ROOT/install
+    if [ ! -d $AGENT_ROOT/install/Python-2.7.17 ]; then
+      tar xzf $AGENT_ROOT/install/Python-2.7.17.tgz -C $AGENT_ROOT/install
     fi
-    cd $AGENT_ROOT/install/Python-2.7.5
+    cd $AGENT_ROOT/install/Python-2.7.17
     ./configure --prefix=$PYTHON_HOME
     make
     make install
@@ -22,7 +22,7 @@ install_agent() {
 
   export PATH=$PYTHON_HOME/bin:$PATH
 
-  python $AGENT_ROOT/virtualenv/virtualenv.py -p /usr/bin/python2.7 $AGENT_ROOT/.venv
+  python $AGENT_ROOT/virtualenv/virtualenv.py $AGENT_ROOT/.venv
   $VENV_BIN/pip install --no-index --find-links=$AGENT_ROOT/wheels APScheduler
   if [ $? -ne 0 ]
   then

@@ -11,6 +11,11 @@ def get_configs():
 
     env = cp.get('general', 'env')
 
+    if cp.has_option(env, 'update.info.path'):
+        update_info_path = cp.get(env, 'update.info.path')
+    else:
+        update_info_path = '/win/latest'
+
     configs = {
         'home_dir': home_dir,
         'agent_dir': os.path.join(home_dir, cp.get(env, 'agent.dir')),
@@ -18,6 +23,7 @@ def get_configs():
         'update_check_period': cp.getint(env, 'update.check.period'),
         'main_loop_period_minute': cp.getint(env, 'main.loop.period.minute'),
         'update_server_url': cp.get(env, 'update.server.url'),
-        'health_check_threshold': cp.getint(env, 'health.check.threshold')
+        'health_check_threshold': cp.getint(env, 'health.check.threshold'),
+        'update_info_path': update_info_path
     }
     return configs

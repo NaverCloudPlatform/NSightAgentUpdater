@@ -24,10 +24,10 @@ def get_version_from_path(path):
     return get_version(get_file_name(path))
 
 
-def check_file(file_path, check_code=None):
-    if not check_code:
-        return True
-    if get_file_md5(file_path) == check_code:
+def check_file(file_path, checksum):
+    if not checksum:
+        return False
+    if get_file_md5(file_path) == checksum:
         return True
     else:
         return False
@@ -45,3 +45,25 @@ def get_file_md5(filename):
             myhash.update(b)
         f.close()
         return myhash.hexdigest()
+
+
+def get_checksum(package_path, checksum_dir):
+    checksum_path = '%s/%s' % (checksum_dir, get_file_name_without_extension(package_path))
+    if os.path.isfile(checksum_path):
+        with open(checksum_path) as f:
+            return f.read()
+    else:
+        return None
+
+
+def save_checksum(checksum, package_path, checksum_dir):
+    package_name = get_file_name_without_extension(package_path)
+    with open('%s/%s' % (checksum_dir, package_name), 'w+') as f:
+        f.truncate()
+        f.write(checksum)
+
+
+def remove_checksum(package_path, checksum_dir):
+    checksum_path = '%s/%s' % (checksum_dir, get_file_name_without_extension(package_path))
+    if os.path.isfile(checksum_path):
+        os.remove(checksum_path)

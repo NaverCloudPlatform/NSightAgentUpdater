@@ -1,4 +1,6 @@
 import os
+import signal
+import threading
 import time
 
 import fcntl
@@ -10,11 +12,12 @@ LOG = logger.get_logger('Tracker')
 
 class ProcessHolder(object):
 
-    def __init__(self):
+    def __init__(self, recycle_queue):
         print 'init Tracker'
         self.buffer = ''
         self.datalines = []
         self.last_datapoint = int(time.time())
+        self.recycle_queue = recycle_queue
 
     def read(self, process):
         try:
@@ -72,8 +75,52 @@ class ProcessHolder(object):
             while len(self.datalines):
                 yield self.datalines.pop(0)
 
+    def kill_process(self, process, process_name=None):
+        if process is None:
+            return
+        if process_name:
+            os.popen('killall -g %s' % process_name)
+        else:
+            os.killpg(process.pid, signal.SIGTERM)
+        self.recycle_queue.put(process)
+
+    def wait_process(self, process):
+        if process:
+            self.recycle_queue.put(process)
+
     @staticmethod
     def set_nonblocking(fd):
         """"Sets the given file descriptor to non-blocking mode."""
         fl = fcntl.fcntl(fd, fcntl.F_GETFL) | os.O_NONBLOCK
         fcntl.fcntl(fd, fcntl.F_SETFL, fl)
+
+
+class ProcessRecycle(threading.Thread):
+
+    def __init__(self, queue):
+        super(ProcessRecycle, self).__init__()
+        self.queue = queue
+
+    def run(self):
+        while True:
+            try:
+                if self.queue.empty():
+                    time.sleep(1)
+                else:
+                    process = self.queue.get()
+
+                    if process is None or process.poll() is not None:
+                        LOG.debug("----------- process recycled")
+                        continue
+
+                    LOG.debug("----------- process recycle 000")
+                    time.sleep(10)
+                    if process.poll() is None:
+                        LOG.debug("----------- process recycle 111")
+                        os.killpg(process.pid, signal.SIGKILL)
+                        self.queue.put(process)
+                    else:
+                        LOG.debug("----------- process recycle 222")
+
+            except Exception as e:
+                LOG.exception('shutting down process failed, err: %s', e)

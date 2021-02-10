@@ -1,8 +1,9 @@
-# AgentController
+# AgentUpdater
 
 ## installation: ##
 
 #### Linux install:
+(if on Ubuntu14, need to execute "apt-get update" first)
 1. wget http://repo.nsight.fin-ncloud.com/agent_controller_linux.tar.gz
 2. tar xzf agent_controller_linux.tar.gz
 3. ./agent_controller_linux/install_agent.sh
