@@ -11,8 +11,8 @@ LOG = logger.get_logger('agent_tracker')
 
 class AgentHolder(ProcessHolder):
 
-    def __init__(self, agent_dir):
-        super(AgentHolder, self).__init__()
+    def __init__(self, agent_dir, recycle_queue):
+        super(AgentHolder, self).__init__(recycle_queue)
         self.agent_dir = agent_dir
         self.agent_process = None
         self.log_thread = None
@@ -20,7 +20,7 @@ class AgentHolder(ProcessHolder):
         self.last_check_time = int(time.time())
 
     def start(self):
-        LOG.debug('______ start agent: %s', self.agent_dir)
+        LOG.info('______ start agent: %s', self.agent_dir)
         # print self.agent_dir
         py = '%s\\venv\\Scripts\\python' % self.agent_dir
         entry = '%s\\agent.py' % self.agent_dir
@@ -40,14 +40,16 @@ class AgentHolder(ProcessHolder):
 
     def stop(self):
         # LOG.debug('...... stop-agent, gpid:%d, pid:%d' % (os.getpgid(self.agent_process.pid), self.agent_process.pid))
-        LOG.debug('______ stop agent')
+        LOG.info('______ stop agent')
         if self.log_thread:
             self.log_thread.stop()
 
-        # self.agent_process.kill()
-        os.popen('taskkill /f /pid %s /T' % self.agent_process.pid)
-        if self.agent_process:
-            self.agent_process.wait()
+        self.kill_process(self.agent_process)
+        self.agent_process = None
+
+        # os.popen('taskkill /f /pid %s /T' % self.agent_process.pid)
+        # if self.agent_process:
+        #     self.agent_process.wait()
 
 
 class DumpLogThread(threading.Thread):

@@ -23,12 +23,12 @@ def setup_logger(logger, logfile, max_bytes, backup_count):
     rfhandler.setLevel(logging.DEBUG)
     rfhandler.setFormatter(formatter)
 
-    consolehandler = logging.StreamHandler(sys.stdout)
-    consolehandler.setLevel(logging.DEBUG)
-    consolehandler.setFormatter(formatter)
+    # consolehandler = logging.StreamHandler(sys.stdout)
+    # consolehandler.setLevel(logging.DEBUG)
+    # consolehandler.setFormatter(formatter)
 
     logger.addHandler(rfhandler)
-    logger.addHandler(consolehandler)
+    # logger.addHandler(consolehandler)
 
 
 def get_logger(name, logfile=DEFAULT_LOG, max_bytes=10 * 1024 * 1024, backup_count=20):
